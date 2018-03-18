@@ -56,6 +56,7 @@ enum COMMANDS
     CMD_VOLUME,
     CMD_ARRAY,
     CMD_CUBEARRAY,
+	CMD_MIPCHAIN,
     CMD_H_CROSS,
     CMD_V_CROSS,
     CMD_H_STRIP,
@@ -112,6 +113,7 @@ const SValue g_pCommands[] =
     { L"volume",    CMD_VOLUME },
     { L"array",     CMD_ARRAY },
     { L"cubearray", CMD_CUBEARRAY },
+    { L"mipchain",  CMD_MIPCHAIN },
     { L"h-cross",   CMD_H_CROSS },
     { L"v-cross",   CMD_V_CROSS },
     { L"h-strip",   CMD_H_STRIP },
@@ -949,6 +951,7 @@ int __cdecl wmain(_In_ int argc, _In_z_count_(argc) wchar_t* argv[])
     case CMD_VOLUME:
     case CMD_ARRAY:
     case CMD_CUBEARRAY:
+    case CMD_MIPCHAIN:
     case CMD_H_CROSS:
     case CMD_V_CROSS:
     case CMD_H_STRIP:
@@ -958,7 +961,7 @@ int __cdecl wmain(_In_ int argc, _In_z_count_(argc) wchar_t* argv[])
         break;
 
     default:
-        wprintf(L"Must use one of: cube, volume, array, cubearray,\n   h-cross, v-cross, h-strip, v-strip\n   merge, gif\n\n");
+        wprintf(L"Must use one of: cube, volume, array, cubearray, mipchain,\n   h-cross, v-cross, h-strip, v-strip\n   merge, gif\n\n");
         return 1;
     }
 
@@ -1523,6 +1526,11 @@ int __cdecl wmain(_In_ int argc, _In_z_count_(argc) wchar_t* argv[])
             }
             if (info.width != width || info.height != height)
             {
+				if (dwCommand == CMD_MIPCHAIN)
+				{
+					wprintf(L"Resizing mip from [%zu,%zu] to [%zu,%zu]\n", info.width, info.height, width, height);
+				}
+
                 std::unique_ptr<ScratchImage> timage(new (std::nothrow) ScratchImage);
                 if (!timage)
                 {
@@ -1671,6 +1679,21 @@ int __cdecl wmain(_In_ int argc, _In_z_count_(argc) wchar_t* argv[])
 
             images += info.arraySize;
             loadedImages.emplace_back(std::move(image));
+
+			if (dwCommand == CMD_MIPCHAIN)
+			{
+				if (width == 1 && height == 1)
+				{
+					break;
+				}
+				else
+				{
+					if (width > 1)
+						width >>= 1;
+					if (height > 1)
+						height >>= 1;
+				}
+			}
         }
     }
 
@@ -1964,6 +1987,10 @@ int __cdecl wmain(_In_ int argc, _In_z_count_(argc) wchar_t* argv[])
         case CMD_CUBEARRAY:
             hr = result.InitializeCubeFromImages(&imageArray[0], imageArray.size());
             break;
+
+		case CMD_MIPCHAIN:
+			hr = result.InitializeMipChainFromImages(&imageArray[0], imageArray.size());
+			break;
         }
 
         if (FAILED(hr))
