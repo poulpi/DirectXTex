@@ -56,7 +56,7 @@ enum COMMANDS
     CMD_VOLUME,
     CMD_ARRAY,
     CMD_CUBEARRAY,
-	CMD_MIPCHAIN,
+	CMD_2DMIPCHAIN,
     CMD_H_CROSS,
     CMD_V_CROSS,
     CMD_H_STRIP,
@@ -109,18 +109,18 @@ struct SValue
 
 const SValue g_pCommands[] =
 {
-    { L"cube",      CMD_CUBE },
-    { L"volume",    CMD_VOLUME },
-    { L"array",     CMD_ARRAY },
-    { L"cubearray", CMD_CUBEARRAY },
-    { L"mipchain",  CMD_MIPCHAIN },
-    { L"h-cross",   CMD_H_CROSS },
-    { L"v-cross",   CMD_V_CROSS },
-    { L"h-strip",   CMD_H_STRIP },
-    { L"v-strip",   CMD_V_STRIP },
-    { L"merge",     CMD_MERGE },
-    { L"gif",       CMD_GIF },
-    { nullptr,      0 }
+    { L"cube",         CMD_CUBE },
+    { L"volume",       CMD_VOLUME },
+    { L"array",        CMD_ARRAY },
+    { L"cubearray",    CMD_CUBEARRAY },
+    { L"2d-mipchain",  CMD_2DMIPCHAIN },
+    { L"h-cross",      CMD_H_CROSS },
+    { L"v-cross",      CMD_V_CROSS },
+    { L"h-strip",      CMD_H_STRIP },
+    { L"v-strip",      CMD_V_STRIP },
+    { L"merge",        CMD_MERGE },
+    { L"gif",          CMD_GIF },
+    { nullptr,         0 }
 };
 
 const SValue g_pOptions [] =
@@ -951,7 +951,7 @@ int __cdecl wmain(_In_ int argc, _In_z_count_(argc) wchar_t* argv[])
     case CMD_VOLUME:
     case CMD_ARRAY:
     case CMD_CUBEARRAY:
-    case CMD_MIPCHAIN:
+    case CMD_2DMIPCHAIN:
     case CMD_H_CROSS:
     case CMD_V_CROSS:
     case CMD_H_STRIP:
@@ -1333,13 +1333,13 @@ int __cdecl wmain(_In_ int argc, _In_z_count_(argc) wchar_t* argv[])
                         return 1;
                     }
 
-                    if (info.mipLevels > 1
-                        || info.IsVolumemap()
-                        || info.IsCubemap())
-                    {
-                        wprintf(L"\nERROR: Can't assemble complex surfaces\n");
-                        return 1;
-                    }
+					if (info.mipLevels > 1
+						|| info.IsVolumemap()
+						|| info.IsCubemap())
+					{
+						wprintf(L"\nERROR: Can't assemble complex surfaces\n");
+						return 1;
+					}
                 }
                 else if (_wcsicmp(ext, L".tga") == 0)
                 {
@@ -1526,7 +1526,7 @@ int __cdecl wmain(_In_ int argc, _In_z_count_(argc) wchar_t* argv[])
             }
             if (info.width != width || info.height != height)
             {
-				if (dwCommand == CMD_MIPCHAIN)
+				if (dwCommand == CMD_2DMIPCHAIN)
 				{
 					wprintf(L"Resizing mip from [%zu,%zu] to [%zu,%zu]\n", info.width, info.height, width, height);
 				}
@@ -1680,7 +1680,7 @@ int __cdecl wmain(_In_ int argc, _In_z_count_(argc) wchar_t* argv[])
             images += info.arraySize;
             loadedImages.emplace_back(std::move(image));
 
-			if (dwCommand == CMD_MIPCHAIN)
+			if (dwCommand == CMD_2DMIPCHAIN)
 			{
 				if (width == 1 && height == 1)
 				{
@@ -1988,8 +1988,8 @@ int __cdecl wmain(_In_ int argc, _In_z_count_(argc) wchar_t* argv[])
             hr = result.InitializeCubeFromImages(&imageArray[0], imageArray.size());
             break;
 
-		case CMD_MIPCHAIN:
-			hr = result.InitializeMipChainFromImages(&imageArray[0], imageArray.size());
+		case CMD_2DMIPCHAIN:
+			hr = result.Initialize2DMipChainFromImages(&imageArray[0], imageArray.size());
 			break;
         }
 
