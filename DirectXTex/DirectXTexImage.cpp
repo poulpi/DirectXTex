@@ -651,61 +651,6 @@ HRESULT ScratchImage::Initialize3DFromImages(const Image* images, size_t depth, 
     return S_OK;
 }
 
-_Use_decl_annotations_
-HRESULT ScratchImage::Initialize2DMipChainFromImages(const Image* images, size_t nImages, DWORD flags)
-{
-    if (!images || !nImages)
-        return E_INVALIDARG;
-
-    DXGI_FORMAT format = images[0].format;
-    size_t width = images[0].width;
-    size_t height = images[0].height;
-
-    for (size_t index = 0; index < nImages; ++index)
-    {
-        if (!images[index].pixels)
-            return E_POINTER;
-
-        if (images[index].format != format || images[index].width != width >> index || images[index].height != height >> index)
-            return E_FAIL;
-    }
-
-	HRESULT hr = Initialize2D(format, width, height, 1, nImages, flags);
-
-    if (FAILED(hr))
-        return hr;
-
-    for (size_t index = 0; index < nImages; ++index)
-    {
-		size_t rowCount = ComputeScanlines(format, height >> index);
-		if (!rowCount)
-			return E_UNEXPECTED;
-
-        auto sptr = reinterpret_cast<const uint8_t*>(images[index].pixels);
-        if (!sptr)
-            return E_POINTER;
-
-        assert(index < m_nimages);
-        auto dptr = reinterpret_cast<uint8_t*>(m_image[index].pixels);
-        if (!dptr)
-            return E_POINTER;
-
-        size_t spitch = images[index].rowPitch;
-        size_t dpitch = m_image[index].rowPitch;
-
-        size_t size = std::min<size_t>(dpitch, spitch);
-
-        for (size_t y = 0; y < rowCount; ++y)
-        {
-            memcpy_s(dptr, dpitch, sptr, size);
-            sptr += spitch;
-            dptr += dpitch;
-        }
-    }
-
-    return S_OK;
-}
-
 void ScratchImage::Release()
 {
     m_nimages = 0;
