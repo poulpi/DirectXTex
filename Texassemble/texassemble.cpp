@@ -1333,13 +1333,13 @@ int __cdecl wmain(_In_ int argc, _In_z_count_(argc) wchar_t* argv[])
                         return 1;
                     }
 
-					if (info.mipLevels > 1
-						|| info.IsVolumemap()
-						|| info.IsCubemap())
-					{
-						wprintf(L"\nERROR: Can't assemble complex surfaces\n");
-						return 1;
-					}
+                    if (info.mipLevels > 1
+                        || info.IsVolumemap()
+                        || info.IsCubemap())
+                    {
+                        wprintf(L"\nERROR: Can't assemble complex surfaces\n");
+                        return 1;
+                    }
                 }
                 else if (_wcsicmp(ext, L".tga") == 0)
                 {
