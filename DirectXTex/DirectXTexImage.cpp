@@ -666,7 +666,7 @@ HRESULT ScratchImage::Initialize2DMipChainFromImages(const Image* images, size_t
         if (!images[index].pixels)
             return E_POINTER;
 
-        if (images[index].format != format || images[index].width != width >> index || images[index].height != height >> index)
+        if (images[index].format != format || images[index].width != std::max((size_t)1, width >> index) || images[index].height != std::max((size_t)1, height >> index))
             return E_FAIL;
     }
 
