@@ -677,7 +677,7 @@ HRESULT ScratchImage::Initialize2DMipChainFromImages(const Image* images, size_t
 
     for (size_t index = 0; index < nImages; ++index)
     {
-		size_t rowCount = ComputeScanlines(format, height >> index);
+		size_t rowCount = ComputeScanlines(format, std::max((size_t)1, height >> index));
 		if (!rowCount)
 			return E_UNEXPECTED;
 
